@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chat_with_qt_server", "chat_with_qt_server\chat_with_qt_server.vcxproj", "{B0A2FD7B-01F5-44A8-85FE-568E2A79490B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chat_with_qt_client", "chat_with_qt_client\chat_with_qt_client.vcxproj", "{69200968-CC7A-4E09-9780-E04E8F6F9805}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0A2FD7B-01F5-44A8-85FE-568E2A79490B}.Debug|x64.ActiveCfg = Debug|x64
+		{B0A2FD7B-01F5-44A8-85FE-568E2A79490B}.Debug|x64.Build.0 = Debug|x64
+		{B0A2FD7B-01F5-44A8-85FE-568E2A79490B}.Release|x64.ActiveCfg = Release|x64
+		{B0A2FD7B-01F5-44A8-85FE-568E2A79490B}.Release|x64.Build.0 = Release|x64
+		{69200968-CC7A-4E09-9780-E04E8F6F9805}.Debug|x64.ActiveCfg = Debug|x64
+		{69200968-CC7A-4E09-9780-E04E8F6F9805}.Debug|x64.Build.0 = Debug|x64
+		{69200968-CC7A-4E09-9780-E04E8F6F9805}.Release|x64.ActiveCfg = Release|x64
+		{69200968-CC7A-4E09-9780-E04E8F6F9805}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {33FE75D6-FA1D-4571-B13E-39464F4A09F5}
+	EndGlobalSection
+EndGlobal
