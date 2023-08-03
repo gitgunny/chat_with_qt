@@ -7,36 +7,36 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QTextBrowser>
-//#include <QtNetwork/QTcpServer>
-//#include <QtNetwork/QTcpSocket>
+#include <QtNetwork/QTcpServer>
+#include <QtNetwork/QTcpSocket>
 #include "ui_chat_with_qt_server.h"
 
-class chat_with_qt_server_w : public QWidget
+#include <QDebug> //*// 최종 디버그시 생성자 소멸자 순서 확인(X 클릭 종료시에도 확인)
+
+class serverWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	chat_with_qt_server_w(QWidget* parent = nullptr);
-	~chat_with_qt_server_w();
+	serverWidget(QWidget* parent = nullptr);
+	~serverWidget();
 
 private:
-	int port = 0;
-	QString message;
 	QTextBrowser* textBrowser;
 	QPushButton* pushButton1, * pushButton2;
-	//QTcpServer server;
-	//QTcpSocket* client;
-
-public:
-	void initServer();
 
 signals:
-	void sendShow();
+	void dialogShow();
+	void serverStop();
 
 public slots:
 	void pushButton1Clicked();
-	void receivePort(const int& port);
 	void pushButton2Clicked();
+
+	void setWidgetTitle(QString title);
+	void pushButton1Status(bool status);
+	void pushButton2Status(bool status);
+	void messageAppend(QString text);
 
 	//private:
 	//    Ui::chat_with_qt_serverClass ui;
@@ -44,13 +44,13 @@ public slots:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class chat_with_qt_server_d : public QDialog
+class serverDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	chat_with_qt_server_d(QWidget* parent = nullptr);
-	~chat_with_qt_server_d();
+	serverDialog(QWidget* parent = nullptr);
+	~serverDialog();
 
 private:
 	QLabel* label1, * label2;
@@ -58,12 +58,59 @@ private:
 	QPushButton* pushButton;
 
 signals:
-	void sendPort(const int& port);
+	void serverStart(const int& port);
 
 public slots:
-	void receiveShow();
 	void pushButtonClicked();
+
+	void dialogShow();
 
 	//private:
 	//    Ui::chat_with_qt_serverClass ui;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class serverClass : public QWidget
+{
+	Q_OBJECT
+
+public:
+	serverClass(QWidget* parent = nullptr);
+	~serverClass();
+
+signals:
+	void setWidgetTitle(QString title);
+	void pushButton1Status(bool status);
+	void pushButton2Status(bool status);
+	void messageAppend(QString text);
+
+public slots:
+	void serverStart(const int& port);
+	void serverStop();
+	void sendMessage(QString text);
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class server : public QTcpServer
+{
+	Q_OBJECT
+
+public:
+	server(QWidget* perant = nullptr);
+	~server();
+
+private:
+	QList<QTcpSocket*> clients;
+
+protected:
+	void incomingConnection(qintptr socketDescriptor) override;
+
+signals:
+	void sendMessage(QString text);
+
+private slots:
+	void readClient();
+	void clientDisconnected();
 };

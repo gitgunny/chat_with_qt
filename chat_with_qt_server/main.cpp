@@ -4,14 +4,19 @@
 int main(int argc, char* argv[])
 {
 	QApplication a(argc, argv);
-	chat_with_qt_server_w w;
-	chat_with_qt_server_d d;
+	serverWidget w;
+	serverDialog d;
+	serverClass s;
 
-	QObject::connect(&w, &chat_with_qt_server_w::sendShow, &d, &chat_with_qt_server_d::receiveShow);
-	QObject::connect(&d, &chat_with_qt_server_d::sendPort, &w, &chat_with_qt_server_w::receivePort);
+	QObject::connect(&w, &serverWidget::dialogShow, &d, &serverDialog::dialogShow);
+	QObject::connect(&d, &serverDialog::serverStart, &s, &serverClass::serverStart);
+	QObject::connect(&w, &serverWidget::serverStop, &s, &serverClass::serverStop);
+	QObject::connect(&s, &serverClass::setWidgetTitle, &w, &serverWidget::setWidgetTitle);
+	QObject::connect(&s, &serverClass::pushButton1Status, &w, &serverWidget::pushButton1Status);
+	QObject::connect(&s, &serverClass::pushButton2Status, &w, &serverWidget::pushButton2Status);
+	QObject::connect(&s, &serverClass::messageAppend, &w, &serverWidget::messageAppend);
 
 	w.show();
-	//d.exec();
 
 	return a.exec();
 }

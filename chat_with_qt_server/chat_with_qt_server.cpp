@@ -1,6 +1,6 @@
 ﻿#include "chat_with_qt_server.h"
 
-chat_with_qt_server_w::chat_with_qt_server_w(QWidget* parent)
+serverWidget::serverWidget(QWidget* parent)
 	: QWidget(parent)
 {
 	//ui.setupUi(this);
@@ -21,78 +21,50 @@ chat_with_qt_server_w::chat_with_qt_server_w(QWidget* parent)
 	pushButton2->setText("서버 종료");
 	pushButton2->setDisabled(true);
 
-	connect(pushButton1, &QPushButton::clicked, this, &chat_with_qt_server_w::pushButton1Clicked);
-	connect(pushButton2, &QPushButton::clicked, this, &chat_with_qt_server_w:: pushButton2Clicked);
+	connect(pushButton1, &QPushButton::clicked, this, &serverWidget::pushButton1Clicked);
+	connect(pushButton2, &QPushButton::clicked, this, &serverWidget::pushButton2Clicked);
 }
 
-chat_with_qt_server_w::~chat_with_qt_server_w()
+serverWidget::~serverWidget()
 {
 	//QMessageBox::information(this, nullptr, "~w");
 }
 
-void chat_with_qt_server_w::initServer()
+void serverWidget::pushButton1Clicked()
 {
-	/*
-	//if (server.listen(QHostAddress::QHostAddress("127.0.0.1"), port) == false)
-	if (server.listen(QHostAddress::Any, port) == false)
-		QMessageBox::critical(this, nullptr, "서버 실행에 실패 하였습니다.");
-	else
-	{
-		message += QString::QString("127.0.0.1 : %1 서버 실행\n").arg(port);
-
-		while (server.isListening())
-		{
-			if (server.waitForNewConnection(-1))
-			{
-				client = server.nextPendingConnection();
-				message += "클라이언트 접속\n"; ////////// 접속 클라이언트 아이피 포트 문구추가
-
-				QString tmpMessage;
-				if (client->waitForReadyRead())
-					tmpMessage = client->readAll();
-
-				message += tmpMessage;
-
-				QTextStream stream(client);
-				stream << tmpMessage;
-				client->flush();
-			}
-		}
-	}
-	*/
+	dialogShow();
 }
 
-void chat_with_qt_server_w::pushButton1Clicked()
+void serverWidget::pushButton2Clicked()
 {
-	emit sendShow();
+	serverStop();
 }
 
-void chat_with_qt_server_w::receivePort(const int& port)
+void serverWidget::setWidgetTitle(QString title)
 {
-	this->port = port;
-	setWindowTitle(QString::QString("127.0.0.1 : %1 서버 실행 중").arg(port));
-	pushButton2->setEnabled(true);
-	pushButton1->setDisabled(true);
+	setWindowTitle(title);
 }
 
-void chat_with_qt_server_w::pushButton2Clicked()
+void serverWidget::pushButton1Status(bool status)
 {
-	setWindowTitle("127.0.0.1 : 서버 실행 대기");
-	pushButton1->setEnabled(true);
-	pushButton2->setDisabled(true);
+	pushButton1->setEnabled(status);
+}
 
-	//client->close();
-	//client->deleteLater();
-	//server.close();
-	//server.deleteLater();
+void serverWidget::pushButton2Status(bool status)
+{
+	pushButton2->setEnabled(status);
+}
+
+void serverWidget::messageAppend(QString text)
+{
+	textBrowser->append(text);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-chat_with_qt_server_d::chat_with_qt_server_d(QWidget* parent)
+serverDialog::serverDialog(QWidget* parent)
 	: QDialog(parent)
 {
-	//ui.setupUi(this);
 	//QMessageBox::information(this, nullptr, "d");
 
 	setWindowTitle("서버 생성");
@@ -115,35 +87,148 @@ chat_with_qt_server_d::chat_with_qt_server_d(QWidget* parent)
 	label2->setText("서버 포트");
 
 	textEdit2->setGeometry(80, 42, 150, 26);
-	textEdit2->setPlaceholderText("0~65535");
+	textEdit2->setPlaceholderText("1~65535");
 
 	pushButton = new QPushButton(this);
 
 	pushButton->setGeometry(10, 80, 222, 30);
 	pushButton->setText("생성");
 
-	connect(pushButton, &QPushButton::clicked, this, &chat_with_qt_server_d::pushButtonClicked);
+	connect(pushButton, &QPushButton::clicked, this, &serverDialog::pushButtonClicked);
 }
 
-chat_with_qt_server_d::~chat_with_qt_server_d()
+serverDialog::~serverDialog()
 {
 	//QMessageBox::information(this, nullptr, "~d");
 }
 
-void chat_with_qt_server_d::receiveShow()
-{
-	show();
-}
-
-void chat_with_qt_server_d::pushButtonClicked()
+void serverDialog::pushButtonClicked()
 {
 	if (textEdit2->toPlainText().toInt() == false)
 		QMessageBox::warning(this, nullptr, "숫자만 입력 가능합니다.");
-	else if (textEdit2->toPlainText().toInt() < 0 || textEdit2->toPlainText().toInt() > 65535)
-		QMessageBox::warning(this, nullptr, "0~65535까지만 입력 가능합니다.");
+	else if (textEdit2->toPlainText().toInt() < 1 || textEdit2->toPlainText().toInt() > 65535)
+		QMessageBox::warning(this, nullptr, "1~65535까지만 입력 가능합니다.");
 	else
 	{
-		emit sendPort(textEdit2->toPlainText().toInt());
+		serverStart(textEdit2->toPlainText().toInt());
 		close();
 	}
+}
+
+void serverDialog::dialogShow()
+{
+	exec();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+serverClass::serverClass(QWidget* parent)
+	: QWidget(parent)
+{
+	//QMessageBox::information(this, nullptr, "s");
+}
+
+serverClass::~serverClass()
+{
+	//QMessageBox::information(this, nullptr, "~s");
+}
+
+void serverClass::serverStart(const int& port)
+{
+	server server_socket;
+	if (server_socket.listen(QHostAddress::QHostAddress("127.0.0.1"), port) == false)
+	{
+		QMessageBox::critical(nullptr, nullptr, "서버 생성에 실패 하였습니다.");
+		return;
+	}
+
+	setWidgetTitle(QString::QString("127.0.0.1 : %1 서버 실행 중").arg(port));
+	messageAppend(QString::QString("127.0.0.1 : %1 서버 시작").arg(port));
+	pushButton1Status(false);
+	pushButton2Status(true);
+
+	//////////////////////////////////////////////////
+	// 미구현
+	//////////////////////////////////////////////////
+
+	//*// 서버 소멸자로 이동
+	server_socket.close();
+	server_socket.deleteLater();
+}
+
+void serverClass::serverStop()
+{
+	//*// 서버 소멸자 실행?
+
+	setWidgetTitle("127.0.0.1 : 서버 실행 대기");
+	messageAppend("127.0.0.1 : 서버 종료");
+	pushButton2Status(false);
+	pushButton1Status(true);
+}
+
+void serverClass::sendMessage(QString text)
+{
+	messageAppend(text);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+server::server(QWidget* parent)
+	: QTcpServer(parent)
+{
+	//QMessageBox::information(this, nullptr, "ss");
+}
+
+server::~server()
+{
+	//QMessageBox::information(this, nullptr, "~ss");
+}
+
+void server::incomingConnection(qintptr socketDescriptor)
+{
+	QTcpSocket* clientSocket = new QTcpSocket(this);
+	clientSocket->setSocketDescriptor(socketDescriptor);
+	clients.append(clientSocket);
+
+	connect(clientSocket, &QTcpSocket::readyRead, this, &server::readClient);
+	connect(clientSocket, &QTcpSocket::disconnected, this, &server::clientDisconnected);
+
+	//*// 클라이언트 번호 및 아이피 포트번호 인자로 전달
+	sendMessage("000.000.000.000 : 0000 클라이언트(0000) 접속");
+}
+
+void server::readClient()
+{
+	QTcpSocket* clientSocket = qobject_cast<QTcpSocket*>(sender());
+	if (clientSocket == nullptr)
+		return;
+
+	while (clientSocket->bytesAvailable() > 0)
+	{
+		QByteArray data = clientSocket->readAll();
+		//*// 클라이언트 번호 인자로 전달
+		sendMessage(QString::QString("클라이언트(0000) : %1").arg(data));
+
+		// Echo the message back to all connected clients
+		for (QTcpSocket* otherClient : clients)
+		{
+			if (otherClient != clientSocket)
+			{
+				otherClient->write(data);
+			}
+		}
+	}
+}
+
+void server::clientDisconnected()
+{
+	QTcpSocket* clientSocket = qobject_cast<QTcpSocket*>(sender());
+	if (clientSocket == nullptr)
+		return;
+
+	clients.removeOne(clientSocket);
+	clientSocket->deleteLater();
+
+	//*// 클라이언트 번호 및 아이피 포트번호 인자로 전달
+	sendMessage("000.000.000.000 : 0000 클라이언트(0000) 접속 종료");
 }
