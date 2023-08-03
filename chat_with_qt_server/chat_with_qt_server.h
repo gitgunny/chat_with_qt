@@ -2,11 +2,11 @@
 
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QDialog>
+#include <QTextBrowser>
+#include <QPushButton>
 #include <QLabel>
 #include <QTextEdit>
-#include <QPushButton>
 #include <QMessageBox>
-#include <QTextBrowser>
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
 #include "ui_chat_with_qt_server.h"
@@ -64,9 +64,6 @@ public slots:
 	void pushButtonClicked();
 
 	void dialogShow();
-
-	//private:
-	//    Ui::chat_with_qt_serverClass ui;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
