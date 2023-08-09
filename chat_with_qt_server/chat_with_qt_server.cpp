@@ -122,57 +122,6 @@ void serverDialog::dialogShow()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-serverClass::serverClass(QWidget* parent)
-	: QWidget(parent)
-{
-	//QMessageBox::information(this, nullptr, "s");
-}
-
-serverClass::~serverClass()
-{
-	//QMessageBox::information(this, nullptr, "~s");
-}
-
-void serverClass::serverStart(const int& port)
-{
-	server server_socket;
-	if (server_socket.listen(QHostAddress::QHostAddress("127.0.0.1"), port) == false)
-	{
-		QMessageBox::critical(nullptr, nullptr, "서버 생성에 실패 하였습니다.");
-		return;
-	}
-
-	setWidgetTitle(QString::QString("127.0.0.1 : %1 서버 실행 중").arg(port));
-	messageAppend(QString::QString("127.0.0.1 : %1 서버 시작").arg(port));
-	pushButton1Status(false);
-	pushButton2Status(true);
-
-	//////////////////////////////////////////////////
-	// 미구현
-	//////////////////////////////////////////////////
-
-	//*// 서버 소멸자로 이동
-	server_socket.close();
-	server_socket.deleteLater();
-}
-
-void serverClass::serverStop()
-{
-	//*// 서버 소멸자 실행?
-
-	setWidgetTitle("127.0.0.1 : 서버 실행 대기");
-	messageAppend("127.0.0.1 : 서버 종료");
-	pushButton2Status(false);
-	pushButton1Status(true);
-}
-
-void serverClass::sendMessage(QString text)
-{
-	messageAppend(text);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 server::server(QWidget* parent)
 	: QTcpServer(parent)
 {
@@ -231,4 +180,49 @@ void server::clientDisconnected()
 
 	//*// 클라이언트 번호 및 아이피 포트번호 인자로 전달
 	sendMessage("000.000.000.000 : 0000 클라이언트(0000) 접속 종료");
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+serverClass::serverClass(QWidget* parent)
+	: QWidget(parent)
+{
+	//QMessageBox::information(this, nullptr, "s");
+}
+
+serverClass::~serverClass()
+{
+	//QMessageBox::information(this, nullptr, "~s");
+}
+
+void serverClass::serverStart(const int& port)
+{
+	if (server_socket.listen(QHostAddress::QHostAddress("127.0.0.1"), port) == false)
+	{
+		QMessageBox::critical(nullptr, nullptr, "서버 생성에 실패 하였습니다.");
+		return;
+	}
+
+	setWidgetTitle(QString::QString("127.0.0.1 : %1 서버 실행 중").arg(port));
+	messageAppend(QString::QString("127.0.0.1 : %1 서버 시작").arg(port));
+	pushButton1Status(false);
+	pushButton2Status(true);
+}
+
+void serverClass::serverStop()
+{
+	if (server_socket.isListening() == false)
+		return;
+
+	server_socket.close();
+
+	setWidgetTitle("127.0.0.1 : 서버 실행 대기");
+	messageAppend("127.0.0.1 : 서버 종료");
+	pushButton2Status(false);
+	pushButton1Status(true);
+}
+
+void serverClass::sendMessage(QString text)
+{
+	messageAppend(text);
 }

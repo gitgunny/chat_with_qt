@@ -28,6 +28,7 @@ private:
 signals:
 	void dialogShow();
 	void serverDisconnect();
+	void sendMessage(QString text);
 
 public slots:
 	void pushButton1Clicked();
@@ -76,6 +77,9 @@ public:
 	clientClass(QWidget* parent = nullptr);
 	~clientClass();
 
+private:
+	QTcpSocket clientSocket;
+
 signals:
 	void setWidgetTitle(QString title);
 	void pushButton1Status(bool status);
@@ -88,9 +92,3 @@ public slots:
 	void serverDisconnect();
 	void sendMessage(QString text);
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////
-	// 미구현
-	//////////////////////////////////////////////////

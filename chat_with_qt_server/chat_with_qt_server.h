@@ -68,28 +68,6 @@ public slots:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class serverClass : public QWidget
-{
-	Q_OBJECT
-
-public:
-	serverClass(QWidget* parent = nullptr);
-	~serverClass();
-
-signals:
-	void setWidgetTitle(QString title);
-	void pushButton1Status(bool status);
-	void pushButton2Status(bool status);
-	void messageAppend(QString text);
-
-public slots:
-	void serverStart(const int& port);
-	void serverStop();
-	void sendMessage(QString text);
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 class server : public QTcpServer
 {
 	Q_OBJECT
@@ -110,4 +88,29 @@ signals:
 private slots:
 	void readClient();
 	void clientDisconnected();
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class serverClass : public QWidget
+{
+	Q_OBJECT
+
+public:
+	serverClass(QWidget* parent = nullptr);
+	~serverClass();
+
+private:
+	server server_socket;
+
+signals:
+	void setWidgetTitle(QString title);
+	void pushButton1Status(bool status);
+	void pushButton2Status(bool status);
+	void messageAppend(QString text);
+
+public slots:
+	void serverStart(const int& port);
+	void serverStop();
+	void sendMessage(QString text);
 };

@@ -52,7 +52,8 @@ void clientWidget::pushButton2Clicked()
 
 void clientWidget::pushButton3Clicked()
 {
-	//*// 전송
+	sendMessage(textEdit->toPlainText());
+	textEdit->setText("");
 }
 
 void clientWidget::setWidgetTitle(QString title)
@@ -155,12 +156,13 @@ clientClass::~clientClass()
 
 void clientClass::serverConnect(const int& port)
 {
-	//server_socket.close();
-	//server_socket.deleteLater();
+	clientSocket.connectToHost(QHostAddress::QHostAddress("127.0.0.1"), port);
 
-	//////////////////////////////////////////////////
-	// 미구현
-	//////////////////////////////////////////////////
+	if (clientSocket.waitForConnected() == false)
+	{
+		QMessageBox::critical(nullptr, nullptr, "서버 연결에 실패 하였습니다.");
+		return;
+	}
 
 	setWidgetTitle(QString::QString("127.0.0.1 : %1 서버 접속 중").arg(port));
 	messageAppend(QString::QString("127.0.0.1 : %1 서버 접속").arg(port));
@@ -171,9 +173,10 @@ void clientClass::serverConnect(const int& port)
 
 void clientClass::serverDisconnect()
 {
-	//////////////////////////////////////////////////
-	// 미구현
-	//////////////////////////////////////////////////
+	if (clientSocket.isOpen() == false)
+		return;
+
+	clientSocket.close();
 
 	setWidgetTitle("127.0.0.1 : 서버 접속 대기");
 	messageAppend("127.0.0.1 : 접속 종료");
@@ -186,9 +189,3 @@ void clientClass::sendMessage(QString text)
 {
 	messageAppend(text);
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////
-	// 미구현
-	//////////////////////////////////////////////////
