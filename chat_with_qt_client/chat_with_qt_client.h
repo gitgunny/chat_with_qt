@@ -31,15 +31,16 @@ signals:
 	void sendMessage(QString text);
 
 public slots:
+	void catchEnter();
 	void pushButton1Clicked();
 	void pushButton2Clicked();
 	void pushButton3Clicked();
 
 	void setWidgetTitle(QString title);
+	void textBrowserAppend(QString text);
 	void pushButton1Status(bool status);
 	void pushButton2Status(bool status);
 	void pushButton3Status(bool status);
-	void messageAppend(QString text);
 
 	//private:
 	//    Ui::chat_with_qt_clientClass ui;
@@ -62,6 +63,7 @@ signals:
 	void serverConnect(const int& port);
 
 public slots:
+	void catchEnter();
 	void pushButtonClicked();
 
 	void dialogShow();
@@ -82,10 +84,10 @@ private:
 
 signals:
 	void setWidgetTitle(QString title);
+	void textBrowserAppend(QString text);
 	void pushButton1Status(bool status);
 	void pushButton2Status(bool status);
 	void pushButton3Status(bool status);
-	void messageAppend(QString text);
 
 public slots:
 	void serverConnect(const int& port);

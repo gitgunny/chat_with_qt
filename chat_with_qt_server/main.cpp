@@ -12,9 +12,9 @@ int main(int argc, char* argv[])
 	QObject::connect(&d, &serverDialog::serverStart, &s, &serverClass::serverStart);
 	QObject::connect(&w, &serverWidget::serverStop, &s, &serverClass::serverStop);
 	QObject::connect(&s, &serverClass::setWidgetTitle, &w, &serverWidget::setWidgetTitle);
+	QObject::connect(&s, &serverClass::textBrowserAppend, &w, &serverWidget::textBrowserAppend);
 	QObject::connect(&s, &serverClass::pushButton1Status, &w, &serverWidget::pushButton1Status);
 	QObject::connect(&s, &serverClass::pushButton2Status, &w, &serverWidget::pushButton2Status);
-	QObject::connect(&s, &serverClass::messageAppend, &w, &serverWidget::messageAppend);
 
 	w.show();
 

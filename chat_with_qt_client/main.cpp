@@ -13,10 +13,10 @@ int main(int argc, char* argv[])
 	QObject::connect(&w, &clientWidget::serverDisconnect, &c, &clientClass::serverDisconnect);
 	QObject::connect(&w, &clientWidget::sendMessage, &c, &clientClass::sendMessage);
 	QObject::connect(&c, &clientClass::setWidgetTitle, &w, &clientWidget::setWidgetTitle);
+	QObject::connect(&c, &clientClass::textBrowserAppend, &w, &clientWidget::textBrowserAppend);
 	QObject::connect(&c, &clientClass::pushButton1Status, &w, &clientWidget::pushButton1Status);
 	QObject::connect(&c, &clientClass::pushButton2Status, &w, &clientWidget::pushButton2Status);
 	QObject::connect(&c, &clientClass::pushButton3Status, &w, &clientWidget::pushButton3Status);
-	QObject::connect(&c, &clientClass::messageAppend, &w, &clientWidget::messageAppend);
 
 	w.show();
 

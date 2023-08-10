@@ -45,6 +45,11 @@ void serverWidget::setWidgetTitle(QString title)
 	setWindowTitle(title);
 }
 
+void serverWidget::textBrowserAppend(QString text)
+{
+	textBrowser->append(text);
+}
+
 void serverWidget::pushButton1Status(bool status)
 {
 	pushButton1->setEnabled(status);
@@ -53,11 +58,6 @@ void serverWidget::pushButton1Status(bool status)
 void serverWidget::pushButton2Status(bool status)
 {
 	pushButton2->setEnabled(status);
-}
-
-void serverWidget::messageAppend(QString text)
-{
-	textBrowser->append(text);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,12 +94,29 @@ serverDialog::serverDialog(QWidget* parent)
 	pushButton->setGeometry(10, 80, 222, 30);
 	pushButton->setText("생성");
 
+	connect(textEdit2, &QTextEdit::textChanged, this, &serverDialog::catchEnter);
 	connect(pushButton, &QPushButton::clicked, this, &serverDialog::pushButtonClicked);
 }
 
 serverDialog::~serverDialog()
 {
 	//QMessageBox::information(this, nullptr, "~d");
+}
+
+void serverDialog::catchEnter()
+{
+	if (textEdit2->toPlainText().contains('\n'))
+	{
+		QString	tmpText = textEdit2->toPlainText();
+		tmpText.chop(1);
+		textEdit2->setPlainText(tmpText);
+
+		QTextCursor tmpCursor = textEdit2->textCursor();
+		tmpCursor.movePosition(QTextCursor::End);
+		textEdit2->setTextCursor(tmpCursor);
+
+		pushButtonClicked();
+	}
 }
 
 void serverDialog::pushButtonClicked()
@@ -122,68 +139,6 @@ void serverDialog::dialogShow()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-server::server(QWidget* parent)
-	: QTcpServer(parent)
-{
-	//QMessageBox::information(this, nullptr, "ss");
-}
-
-server::~server()
-{
-	//QMessageBox::information(this, nullptr, "~ss");
-}
-
-void server::incomingConnection(qintptr socketDescriptor)
-{
-	QTcpSocket* clientSocket = new QTcpSocket(this);
-	clientSocket->setSocketDescriptor(socketDescriptor);
-	clients.append(clientSocket);
-
-	connect(clientSocket, &QTcpSocket::readyRead, this, &server::readClient);
-	connect(clientSocket, &QTcpSocket::disconnected, this, &server::clientDisconnected);
-
-	//*// 클라이언트 번호 및 아이피 포트번호 인자로 전달
-	sendMessage("000.000.000.000 : 0000 클라이언트(0000) 접속");
-}
-
-void server::readClient()
-{
-	QTcpSocket* clientSocket = qobject_cast<QTcpSocket*>(sender());
-	if (clientSocket == nullptr)
-		return;
-
-	while (clientSocket->bytesAvailable() > 0)
-	{
-		QByteArray data = clientSocket->readAll();
-		//*// 클라이언트 번호 인자로 전달
-		sendMessage(QString::QString("클라이언트(0000) : %1").arg(data));
-
-		// Echo the message back to all connected clients
-		for (QTcpSocket* otherClient : clients)
-		{
-			if (otherClient != clientSocket)
-			{
-				otherClient->write(data);
-			}
-		}
-	}
-}
-
-void server::clientDisconnected()
-{
-	QTcpSocket* clientSocket = qobject_cast<QTcpSocket*>(sender());
-	if (clientSocket == nullptr)
-		return;
-
-	clients.removeOne(clientSocket);
-	clientSocket->deleteLater();
-
-	//*// 클라이언트 번호 및 아이피 포트번호 인자로 전달
-	sendMessage("000.000.000.000 : 0000 클라이언트(0000) 접속 종료");
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 serverClass::serverClass(QWidget* parent)
 	: QWidget(parent)
 {
@@ -195,34 +150,71 @@ serverClass::~serverClass()
 	//QMessageBox::information(this, nullptr, "~s");
 }
 
+void serverClass::newConnection()
+{
+	clientSocket = serverSocket.nextPendingConnection();
+
+	if (!clientSocket)
+		return;
+
+	textBrowserAppend(QString("%1 : %2 클라이언트 접속").arg(clientSocket->peerAddress().toString()).arg(clientSocket->peerPort()));
+
+	connect(clientSocket, &QTcpSocket::readyRead, this, &serverClass::readyRead);
+	connect(clientSocket, &QTcpSocket::disconnected, this, &serverClass::disconnected);
+}
+
+void serverClass::readyRead()
+{
+	clientSocket = qobject_cast<QTcpSocket*>(sender());
+
+	if (!clientSocket)
+		return;
+
+	QByteArray data = clientSocket->readAll();
+	clientSocket->write(data);
+	clientSocket->flush();
+	textBrowserAppend(QString("%1 : %2 클라이언트 : %3").arg(clientSocket->peerAddress().toString()).arg(clientSocket->peerPort()).arg(data));
+}
+
+void serverClass::disconnected()
+{
+	clientSocket = qobject_cast<QTcpSocket*>(sender());
+
+	if (!clientSocket)
+		return;
+
+	textBrowserAppend(QString("%1 : %2 클라이언트 접속 종료").arg(clientSocket->peerAddress().toString()).arg(clientSocket->peerPort()));
+
+	clientSocket->deleteLater();
+	clientSocket->close();
+}
+
 void serverClass::serverStart(const int& port)
 {
-	if (server_socket.listen(QHostAddress::QHostAddress("127.0.0.1"), port) == false)
+	if (serverSocket.listen(QHostAddress("127.0.0.1"), port) == false)
 	{
 		QMessageBox::critical(nullptr, nullptr, "서버 생성에 실패 하였습니다.");
 		return;
 	}
 
-	setWidgetTitle(QString::QString("127.0.0.1 : %1 서버 실행 중").arg(port));
-	messageAppend(QString::QString("127.0.0.1 : %1 서버 시작").arg(port));
+	connect(&serverSocket, &QTcpServer::newConnection, this, &serverClass::newConnection);
+
+	setWidgetTitle(QString("127.0.0.1 : %1 서버 실행 중").arg(port));
+	textBrowserAppend(QString("127.0.0.1 : %1 서버 시작").arg(port));
 	pushButton1Status(false);
 	pushButton2Status(true);
 }
 
 void serverClass::serverStop()
 {
-	if (server_socket.isListening() == false)
+	if (serverSocket.isListening() == false)
 		return;
 
-	server_socket.close();
+	//serverSocket.disconnect(clientSocket);
+	serverSocket.close();
 
 	setWidgetTitle("127.0.0.1 : 서버 실행 대기");
-	messageAppend("127.0.0.1 : 서버 종료");
+	textBrowserAppend("127.0.0.1 : 서버 종료");
 	pushButton2Status(false);
 	pushButton1Status(true);
-}
-
-void serverClass::sendMessage(QString text)
-{
-	messageAppend(text);
 }

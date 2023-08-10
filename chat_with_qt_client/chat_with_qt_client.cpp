@@ -30,6 +30,7 @@ clientWidget::clientWidget(QWidget* parent)
 	pushButton3->setText("전송");
 	pushButton3->setEnabled(false);
 
+	connect(textEdit, &QTextEdit::textChanged, this, &clientWidget::catchEnter);
 	connect(pushButton1, &QPushButton::clicked, this, &clientWidget::pushButton1Clicked);
 	connect(pushButton2, &QPushButton::clicked, this, &clientWidget::pushButton2Clicked);
 	connect(pushButton3, &QPushButton::clicked, this, &clientWidget::pushButton3Clicked);
@@ -38,6 +39,22 @@ clientWidget::clientWidget(QWidget* parent)
 clientWidget::~clientWidget()
 {
 	//QMessageBox::information(this, nullptr, "~w");
+}
+
+void clientWidget::catchEnter()
+{
+	if (textEdit->toPlainText().contains('\n'))
+	{
+		QString	tmpText = textEdit->toPlainText();
+		tmpText.chop(1);
+		textEdit->setPlainText(tmpText);
+
+		QTextCursor tmpCursor = textEdit->textCursor();
+		tmpCursor.movePosition(QTextCursor::End);
+		textEdit->setTextCursor(tmpCursor);
+
+		pushButton3Clicked();
+	}
 }
 
 void clientWidget::pushButton1Clicked()
@@ -61,6 +78,11 @@ void clientWidget::setWidgetTitle(QString title)
 	setWindowTitle(title);
 }
 
+void clientWidget::textBrowserAppend(QString text)
+{
+	textBrowser->append(text);
+}
+
 void clientWidget::pushButton1Status(bool status)
 {
 	pushButton1->setEnabled(status);
@@ -74,11 +96,6 @@ void clientWidget::pushButton2Status(bool status)
 void clientWidget::pushButton3Status(bool status)
 {
 	pushButton3->setEnabled(status);
-}
-
-void clientWidget::messageAppend(QString text)
-{
-	textBrowser->append(text);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,12 +132,29 @@ clientDialog::clientDialog(QWidget* parent)
 	pushButton->setGeometry(10, 80, 222, 30);
 	pushButton->setText("접속");
 
+	connect(textEdit2, &QTextEdit::textChanged, this, &clientDialog::catchEnter);
 	connect(pushButton, &QPushButton::clicked, this, &clientDialog::pushButtonClicked);
 }
 
 clientDialog::~clientDialog()
 {
 	//QMessageBox::information(this, nullptr, "~d");
+}
+
+void clientDialog::catchEnter()
+{
+	if (textEdit2->toPlainText().contains('\n'))
+	{
+		QString	tmpText = textEdit2->toPlainText();
+		tmpText.chop(1);
+		textEdit2->setPlainText(tmpText);
+
+		QTextCursor tmpCursor = textEdit2->textCursor();
+		tmpCursor.movePosition(QTextCursor::End);
+		textEdit2->setTextCursor(tmpCursor);
+
+		pushButtonClicked();
+	}
 }
 
 void clientDialog::pushButtonClicked()
@@ -156,7 +190,7 @@ clientClass::~clientClass()
 
 void clientClass::serverConnect(const int& port)
 {
-	clientSocket.connectToHost(QHostAddress::QHostAddress("127.0.0.1"), port);
+	clientSocket.connectToHost(QHostAddress("127.0.0.1"), port);
 
 	if (clientSocket.waitForConnected() == false)
 	{
@@ -164,8 +198,8 @@ void clientClass::serverConnect(const int& port)
 		return;
 	}
 
-	setWidgetTitle(QString::QString("127.0.0.1 : %1 서버 접속 중").arg(port));
-	messageAppend(QString::QString("127.0.0.1 : %1 서버 접속").arg(port));
+	setWidgetTitle(QString("127.0.0.1 : %1 서버 접속 중").arg(port));
+	textBrowserAppend(QString("127.0.0.1 : %1 서버 접속").arg(port));
 	pushButton1Status(false);
 	pushButton2Status(true);
 	pushButton3Status(true);
@@ -179,7 +213,7 @@ void clientClass::serverDisconnect()
 	clientSocket.close();
 
 	setWidgetTitle("127.0.0.1 : 서버 접속 대기");
-	messageAppend("127.0.0.1 : 접속 종료");
+	textBrowserAppend("127.0.0.1 : 접속 종료");
 	pushButton1Status(true);
 	pushButton2Status(false);
 	pushButton3Status(false);
@@ -187,5 +221,8 @@ void clientClass::serverDisconnect()
 
 void clientClass::sendMessage(QString text)
 {
-	messageAppend(text);
+	clientSocket.write(text.toUtf8());
+	clientSocket.waitForReadyRead();
+	QByteArray responseData = clientSocket.readAll();
+	textBrowserAppend(QString("%1").arg(responseData));
 }

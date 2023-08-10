@@ -34,9 +34,9 @@ public slots:
 	void pushButton2Clicked();
 
 	void setWidgetTitle(QString title);
+	void textBrowserAppend(QString text);
 	void pushButton1Status(bool status);
 	void pushButton2Status(bool status);
-	void messageAppend(QString text);
 
 	//private:
 	//    Ui::chat_with_qt_serverClass ui;
@@ -61,33 +61,10 @@ signals:
 	void serverStart(const int& port);
 
 public slots:
+	void catchEnter();
 	void pushButtonClicked();
 
 	void dialogShow();
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class server : public QTcpServer
-{
-	Q_OBJECT
-
-public:
-	server(QWidget* perant = nullptr);
-	~server();
-
-private:
-	QList<QTcpSocket*> clients;
-
-protected:
-	void incomingConnection(qintptr socketDescriptor) override;
-
-signals:
-	void sendMessage(QString text);
-
-private slots:
-	void readClient();
-	void clientDisconnected();
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,16 +78,20 @@ public:
 	~serverClass();
 
 private:
-	server server_socket;
+	QTcpServer serverSocket;
+	QTcpSocket* clientSocket;
 
 signals:
 	void setWidgetTitle(QString title);
+	void textBrowserAppend(QString text);
 	void pushButton1Status(bool status);
 	void pushButton2Status(bool status);
-	void messageAppend(QString text);
 
 public slots:
+	void newConnection();
+	void readyRead();
+	void disconnected();
+
 	void serverStart(const int& port);
 	void serverStop();
-	void sendMessage(QString text);
 };
